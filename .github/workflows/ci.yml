@@ -31,9 +31,9 @@ jobs:
             -p 8080:80 \
             devops-dashboard:test
 
-        sleep 5
+          sleep 5
 
-        curl --fail http://localhost:8080
+          curl --fail http://localhost:8080
 
-        docker stop dashboard-test
-        docker rm dashboard-test
+          docker stop dashboard-test
+          docker rm dashboard-test
