@@ -1,0 +1,39 @@
+name: DevOps CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        working-directory: apps/status-dashboard
+        run: docker compose config
+
+      - name: Build Docker image
+        working-directory: apps/status-dashboard
+        run: docker build -t devops-dashboard:test .
+
+      - name: Test Docker image
+        run: |
+          docker run -d \
+            --name dashboard-test \
+            -p 8080:80 \
+            devops-dashboard:test
+
+          sleep 5
+
+        curl --fail http://localhost:8080
+
+        docker stop dashboard-test
+        docker rm dashboard-test
