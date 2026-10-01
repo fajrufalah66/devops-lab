@@ -41,7 +41,7 @@ jobs:
         with:
           context: ./apps/status-dashboard
           push: ${{ github.event_name == 'push' }}
-          tags:
-            ghcr.io/${{ github.repository_owner }}/devops-dashboard:latest
+          tags: |
+            ghcr.io/${{ github_repository_owner }}/devops-dashboard:latest
             ghcr.io/${{ github_repository_owner }}/devops-dashboard:${{ github.sha }}
 
