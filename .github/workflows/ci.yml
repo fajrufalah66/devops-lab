@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
@@ -36,7 +36,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
           context: ./apps/status-dashboard
@@ -45,13 +45,26 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/devops-dashboard:latest
             ghcr.io/${{ github.repository_owner }}/devops-dashboard:${{ github.sha }}
 
+  deploy:
 
-  runner-test:
+    needs: build-and-push
+
+    if: github.event_name == 'push'
+
     runs-on: self-hosted
 
     steps:
-      - name: Check runner
+
+      - name: Deploy to lab2
         run: |
-          hostname
-          ip addr
-          docker --version
+          ssh deployer@192.168.56.12 '
+           cd /opt/devops/apps/status-dashboard &&
+           docker compose pull &&
+           docker compose up -d --force-recreate
+          '
+
+      - name: Health Check
+        run: |
+          ssh deployer@192.168.56.12 '
+           curl --fail http://localhost:8080
+          '
